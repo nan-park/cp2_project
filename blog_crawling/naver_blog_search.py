@@ -3,6 +3,7 @@ import urllib.request
 import json
 import re
 import pandas as pd
+import numpy as np
 
 # selenium 동적 크롤링 python
 import time
@@ -46,7 +47,7 @@ def get_title_link(df, search, CLIENT_ID, CLIENT_SECRET, start=1):
             new_data = {
                 'title': [title],
                 'link': [link],
-                'description': [description]
+                'description': np.nan
             }
             new_df = pd.DataFrame(new_data)
             if not df.empty:
@@ -65,7 +66,8 @@ def get_description(df):
     url_lst = list(df['link'][nan_index])
     # 크롬 드라이버 설치
     driver = webdriver.Chrome(ChromeDriverManager().install())
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(3)
+    i = nan_index[0]
     for url in url_lst:
         driver.get(url)
         time.sleep(1)
@@ -78,6 +80,8 @@ def get_description(df):
             a = driver.find_element(By.CSS_SELECTOR, 'div#content-area').text
             a = re.sub('\n', ' ', a)
             contents.append(a)
+        print(i)
+        i += 1
     print(len(contents))
     df['description'][nan_index] = pd.Series(contents)
     driver.quit()
